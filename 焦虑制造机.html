@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>焦虑制造机™ JLV-2026</title>
+<style>
+  :root{
+    --bg:#0b0d12; --panel:#151924; --panel2:#1c2130; --line:#2a3145;
+    --txt:#e9ecf5; --dim:#8b93a7; --red:#ff4d4f; --amber:#ffb020; --green:#2fd374;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #1a2030, transparent), var(--bg);
+    color:var(--txt);
+    font-family:-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+    min-height:100vh; display:flex; justify-content:center; align-items:flex-start;
+    padding:28px 14px 70px;
+  }
+  .machine{
+    width:min(960px,100%); position:relative;
+    background:linear-gradient(#171c29,#12161f);
+    border:1px solid var(--line); border-radius:20px;
+    box-shadow:0 30px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.05);
+    padding:24px 24px 18px;
+  }
+  .machine.shake{animation:shake .4s linear infinite}
+  @keyframes shake{
+    0%,100%{transform:translate(0,0)} 25%{transform:translate(-1.5px,1px)}
+    50%{transform:translate(1.5px,-1px)} 75%{transform:translate(-1px,-1.5px)}
+  }
+  .screw{position:absolute;width:11px;height:11px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#39415a,#232a3c);
+    box-shadow:inset 0 1px 2px #000}
+  .screw::after{content:"";position:absolute;inset:0;margin:auto;width:7px;height:1.5px;background:#0d1017;transform:rotate(40deg);border-radius:2px}
+  .screw.tl{top:10px;left:10px}.screw.tr{top:10px;right:10px}
+  .screw.bl{bottom:10px;left:10px}.screw.br{bottom:10px;right:10px}
+
+  /* ---- header ---- */
+  .lights{display:flex;gap:9px;justify-content:center;margin-bottom:14px}
+  .lamp{width:8px;height:8px;border-radius:50%;background:#33272a;transition:background .2s}
+  .lamp.on{background:var(--red);box-shadow:0 0 9px var(--red)}
+  header.title{text-align:center;margin-bottom:18px}
+  header.title h1{margin:0;font-size:clamp(24px,4.6vw,34px);letter-spacing:6px}
+  header.title h1 .tm{font-size:.4em;vertical-align:super;letter-spacing:0;color:var(--dim)}
+  header.title .sub{margin-top:6px;font-size:12px;color:var(--dim);letter-spacing:2px;font-family:var(--mono)}
+  .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+  .badge{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:2px 10px;background:var(--panel2)}
+  .badge b{color:#c9d0e2;font-weight:600}
+
+  /* ---- screen ---- */
+  .screen{
+    background:#140404;border:1px solid #40201f;border-radius:12px;
+    padding:16px 18px 14px;position:relative;overflow:hidden;min-height:150px;
+    box-shadow:inset 0 0 40px rgba(120,20,20,.18);
+  }
+  .screen::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(transparent 0 2px, rgba(0,0,0,.22) 2px 3px)}
+  .screen::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:rgba(255,120,120,.03);animation:flicker 3.5s infinite}
+  @keyframes flicker{0%,100%{opacity:.6}48%{opacity:.9}50%{opacity:.3}52%{opacity:.8}}
+  .tag{display:inline-block;font-size:12px;padding:2px 11px;border-radius:99px;
+    border:1px solid var(--tag,#8b93a7);color:var(--tag,#8b93a7);margin-bottom:10px;min-width:52px;text-align:center}
+  .output{font-family:var(--mono);color:#ff8f8f;font-size:clamp(16px,2.5vw,20px);
+    line-height:1.75;min-height:78px;word-break:break-all}
+  .output .caret{display:inline-block;width:9px;background:#ff8f8f;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .history{margin-top:10px;display:flex;flex-direction:column;gap:3px;
+    font-size:11.5px;color:#8f5656;font-family:var(--mono)}
+  .history span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .history span:nth-child(1){opacity:.55}.history span:nth-child(2){opacity:.4}
+  .history span:nth-child(3){opacity:.28}.history span:nth-child(4){opacity:.18}
+  .history span:nth-child(5){opacity:.1}
+
+  /* ---- deck ---- */
+  .deck{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:16px}
+  .module{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .module .label{font-size:11px;color:var(--dim);letter-spacing:3px;margin-bottom:12px;
+    display:flex;justify-content:space-between;font-family:var(--mono)}
+  .btn-red{
+    display:block;margin:4px auto 0;width:148px;height:148px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #ff8585, #e63939 58%, #b91c1c);
+    border:6px solid #7f1d1d;color:#fff;font-size:19px;font-weight:800;letter-spacing:2px;
+    text-shadow:0 1px 2px rgba(0,0,0,.45);cursor:pointer;
+    box-shadow:0 10px 0 #7f1d1d, 0 18px 34px rgba(0,0,0,.55), inset 0 2px 6px rgba(255,255,255,.35);
+    transition:transform .06s, box-shadow .06s, filter .2s;font-family:inherit;
+  }
+  .btn-red:active{transform:translateY(8px);box-shadow:0 2px 0 #7f1d1d, 0 8px 18px rgba(0,0,0,.5), inset 0 2px 6px rgba(255,255,255,.3)}
+  .btn-red:disabled{filter:grayscale(.9) brightness(.6);cursor:not-allowed}
+  .hint{font-size:11.5px;color:var(--dim);text-align:center;margin-top:12px;line-height:1.7}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px}
+  .row:first-of-type{margin-top:2px}
+  select,input[type=number],input[type=text]{
+    background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    border-radius:8px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none;
+  }
+  input[type=number]{width:82px;font-family:var(--mono)}
+  .switch{position:relative;width:46px;height:24px;flex:none}
+  .switch input{opacity:0;width:100%;height:100%;position:absolute;margin:0;cursor:pointer}
+  .switch .track{position:absolute;inset:0;background:#2a3145;border-radius:99px;transition:.2s;pointer-events:none}
+  .switch .track::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#8b93a7;transition:.2s}
+  .switch input:checked+.track{background:#5c1a1a}
+  .switch input:checked+.track::after{transform:translateX(22px);background:var(--red)}
+  .btn-mute{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    border-radius:8px;padding:5px 10px;cursor:pointer;font-size:13px;font-family:inherit}
+  .btn-mute:hover{border-color:#3a4460}
+
+  /* tank gauge */
+  .tankwrap{display:flex;align-items:flex-end;justify-content:center;gap:14px;margin-top:2px}
+  .tank{position:relative;width:74px;height:128px;background:#0d1017;overflow:hidden;
+    border:2px solid var(--line);border-radius:6px 6px 14px 14px}
+  .tank .ticks{position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(to top, transparent 0 23px, rgba(139,147,167,.25) 23px 24px)}
+  .liquid{position:absolute;bottom:0;left:0;right:0;height:0%;transition:height .6s ease;
+    background:linear-gradient(#ff7a7a,#c53030)}
+  .liquid::before{content:"";position:absolute;top:-7px;left:-50%;width:200%;height:12px;
+    background:#ff9d9d;border-radius:44%;opacity:.75;animation:wave 3.2s linear infinite}
+  @keyframes wave{to{transform:translateX(24%)}}
+  .tankval{font-family:var(--mono);font-size:26px;font-weight:700}
+  .tankval small{font-size:11px;color:var(--dim);display:block;margin-top:6px;letter-spacing:2px;font-weight:400}
+  .statline{font-size:11.5px;color:var(--dim);font-family:var(--mono);margin-top:12px;line-height:1.9}
+  .statline b{color:#c9d0e2;font-weight:600}
+
+  /* destroy module */
+  .module.destroy{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .btn-green{
+    background:radial-gradient(circle at 35% 30%, #6ee7a8, #22a35f 60%, #157347);
+    border:4px solid #0f5132;color:#fff;font-size:16px;font-weight:800;letter-spacing:2px;
+    padding:14px 26px;border-radius:14px;cursor:pointer;font-family:inherit;
+    box-shadow:0 7px 0 #0f5132, 0 14px 26px rgba(0,0,0,.45), inset 0 2px 5px rgba(255,255,255,.3);
+    transition:transform .06s, box-shadow .06s;
+  }
+  .btn-green:active{transform:translateY(6px);box-shadow:0 1px 0 #0f5132, 0 8px 16px rgba(0,0,0,.4)}
+  .overheat-banner{
+    position:fixed;top:0;left:0;right:0;z-index:60;display:none;
+    background:repeating-linear-gradient(45deg,#7f1d1d,#7f1d1d 12px,#9a2626 12px,#9a2626 24px);
+    color:#ffe2e2;text-align:center;padding:10px 12px;font-size:14px;font-weight:700;letter-spacing:2px;
+    box-shadow:0 4px 20px rgba(0,0,0,.5)
+  }
+  .overheat-banner.show{display:block;animation:flash 1s steps(2) infinite}
+  @keyframes flash{50%{filter:brightness(1.5)}}
+
+  footer{margin-top:18px;font-size:11.5px;color:#5d6577;line-height:1.9;text-align:center}
+  footer details{text-align:left;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;padding:12px 16px;margin-top:12px;color:#8b93a7}
+  footer summary{cursor:pointer;color:#aeb6c9;font-size:12.5px;letter-spacing:1px}
+  footer details p{margin:8px 0 0;font-size:12.5px;line-height:2}
+  footer details b{color:#c9d0e2}
+
+  /* ---- copy chip ---- */
+  .copy-chip{position:absolute;top:12px;right:12px;z-index:3;background:rgba(255,255,255,.06);
+    border:1px solid #5a3030;color:#c98f8f;font-size:11px;border-radius:99px;padding:3px 10px;
+    cursor:pointer;font-family:inherit}
+  .copy-chip:hover{color:#ff9d9d;border-color:#7a4040}
+
+  /* ---- aux stations 05-08 ---- */
+  .module.wide{grid-column:1/-1}
+  .feedrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .btn-mini{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:9px;
+    padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:1px}
+  .btn-mini:hover{border-color:#3a4460}
+  .btn-mini:disabled{opacity:.5;cursor:not-allowed}
+  .btn-mini.accent{border-color:#5c1a1a;color:#ff8f8f}
+  .btn-mini.wide-btn{width:100%;margin-top:10px}
+  .mini-out{margin-top:10px;font-size:12.5px;line-height:1.9;color:#c9d0e2;
+    background:var(--panel2);border:1px dashed var(--line);border-radius:10px;padding:9px 12px}
+  .destroy-link{background:none;border:none;color:var(--green);cursor:pointer;
+    font-size:12px;text-decoration:underline;padding:0;font-family:inherit}
+  .gacha-res{font-size:13.5px;line-height:1.9;min-height:48px;color:#c9d0e2}
+  .gacha-res b{color:#ff8f8f}
+  .rar{display:inline-block;font-weight:800;font-size:12px;border:1.5px solid;border-radius:6px;
+    padding:1px 7px;margin-right:6px;letter-spacing:1px}
+  .rar.r{color:#8b93a7;border-color:#8b93a7}
+  .rar.sr{color:#38bdf8;border-color:#38bdf8}
+  .rar.ssr{color:#fbbf24;border-color:#fbbf24;text-shadow:0 0 8px rgba(251,191,36,.4)}
+  .rar.ur{color:#f43f5e;border-color:#f43f5e;text-shadow:0 0 10px rgba(244,63,94,.5)}
+  .ur-hit{animation:pop2 .5s ease}
+  @keyframes pop2{0%{transform:scale(1.25)}100%{transform:scale(1)}}
+  .bubbles{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+  .bubble{aspect-ratio:1;border-radius:50%;cursor:pointer;border:none;padding:0;width:100%;
+    background:radial-gradient(circle at 35% 30%, #6ee7a8, #22a35f);
+    box-shadow:inset 0 -2px 4px rgba(0,0,0,.25), 0 2px 6px rgba(0,0,0,.35);
+    transition:transform .12s, opacity .2s, filter .2s}
+  .bubble:hover{transform:scale(1.12)}
+  .bubble.popped{background:#1c2130;box-shadow:inset 0 2px 6px rgba(0,0,0,.6);
+    transform:scale(.82);cursor:default;filter:grayscale(1);opacity:.55}
+  .ticker{margin-top:12px;font-family:var(--mono);font-size:13px;line-height:2.1;color:#c9d0e2;
+    background:#140a08;border:1px solid #4a2a20;border-radius:10px;padding:10px 14px}
+  .ticker b{color:#ff8f8f;font-weight:700}
+  .ticker-note{margin-top:6px;font-size:11px;color:#8a6a5f;line-height:1.7}
+  .life-cd{margin-top:10px;font-family:var(--mono);font-size:12.5px;line-height:1.8;color:#ff8f8f;
+    background:var(--panel2);border:1px dashed #5c1a1a;border-radius:10px;padding:8px 12px}
+
+  /* ================= destroy view ================= */
+  .destroy-view{
+    position:fixed;inset:0;z-index:50;overflow:auto;
+    background:linear-gradient(#07130c,#0a1a10);color:#d7f5e3;
+    display:none;flex-direction:column;align-items:center;padding:34px 16px 60px;
+  }
+  .destroy-view.show{display:flex}
+  .dv-title{text-align:center;margin-bottom:6px}
+  .dv-title h2{margin:0;font-size:clamp(22px,4.5vw,30px);letter-spacing:6px;color:var(--green);text-shadow:0 0 24px rgba(47,211,116,.4)}
+  .dv-title .sub{font-size:11.5px;color:#5c8a6e;letter-spacing:3px;font-family:var(--mono);margin-top:6px}
+  .dv-panel{width:min(760px,100%);background:rgba(47,211,116,.05);border:1px solid #1d3a2a;
+    border-radius:16px;padding:18px;margin-top:16px}
+  .dv-panel h3{margin:0 0 4px;font-size:14px;letter-spacing:3px;color:#9fdcb6}
+  .dv-panel .note{font-size:11.5px;color:#5c8a6e;margin-bottom:10px;font-family:var(--mono)}
+  .shred-list{list-style:none;margin:0;padding:0}
+  .shred-list li{position:relative;padding:10px 84px 10px 14px;border:1px solid #1d3a2a;
+    border-radius:10px;margin:8px 0;font-size:13.5px;color:#9fdcb6;line-height:1.7;
+    transition:all .7s ease}
+  .shred-list li.shredded{color:#3f5c4c;text-decoration:line-through;
+    transform:translateY(22px) rotate(1.5deg);opacity:.28;border-style:dashed}
+  .stamp{position:absolute;right:10px;top:50%;transform:translateY(-50%) rotate(-8deg) scale(.6);
+    color:var(--green);border:2px solid var(--green);border-radius:6px;padding:2px 9px;
+    font-size:12px;font-weight:800;letter-spacing:2px;opacity:0;transition:all .4s .3s}
+  li.shredded .stamp{opacity:1;transform:translateY(-50%) rotate(-8deg) scale(1)}
+  .danmaku{position:relative;height:46px;width:min(760px,100%);overflow:hidden;margin-top:14px;
+    border-top:1px dashed #1d3a2a;border-bottom:1px dashed #1d3a2a}
+  .danmaku span{position:absolute;left:100%;white-space:nowrap;font-size:13px;color:#7fdca0;
+    animation:fly linear forwards}
+  @keyframes fly{to{transform:translateX(calc(-100vw - 100%))}}
+  .breath{display:flex;align-items:center;gap:26px;justify-content:center;flex-wrap:wrap}
+  .circle{width:112px;height:112px;border-radius:50%;flex:none;
+    background:radial-gradient(circle at 35% 30%, #6ee7a8, #22a35f);
+    box-shadow:0 0 44px rgba(47,211,116,.35);transform:scale(.72);
+    transition:transform 4s cubic-bezier(.45,.05,.55,.95)}
+  .breath-text{font-family:var(--mono);text-align:center}
+  .breath-text .ph{font-size:19px;font-weight:700;color:var(--green);letter-spacing:4px}
+  .breath-text .cd{font-size:38px;margin-top:4px}
+  .breath-text .tip{font-size:11.5px;color:#5c8a6e;margin-top:8px;letter-spacing:1px}
+  .cert{width:min(560px,100%);border:3px double #2fd374;border-radius:14px;padding:26px 24px;
+    text-align:center;background:rgba(47,211,116,.06);margin-top:18px;display:none}
+  .cert.show{display:block;animation:pop .5s ease}
+  @keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+  .cert h2{margin:0;font-size:22px;letter-spacing:5px;color:var(--green)}
+  .cert .meta{font-family:var(--mono);font-size:12px;color:#5c8a6e;margin-top:10px;line-height:2}
+  .cert .clause{font-size:13px;color:#9fdcb6;line-height:2;margin-top:12px}
+  .dv-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+  .dv-btn{background:var(--panel2);border:1px solid #1d3a2a;color:#d7f5e3;border-radius:10px;
+    padding:11px 20px;font-size:14px;cursor:pointer;font-family:inherit;letter-spacing:1px}
+  .dv-btn:hover{border-color:#2fd374}
+  .dv-btn.primary{background:#157347;border-color:#157347;font-weight:700}
+  @media (max-width:560px){
+    .machine{padding:18px 14px 14px}
+    .shred-list li{padding-right:70px}
+  }
+</style>
+</head>
+<body>
+
+<div class="overheat-banner" id="overheatBanner">⚠️ 焦虑值过载 · 触发停机保护 · 请立即切换到「销毁模式」⚠️</div>
+
+<main class="machine" id="machine">
+  <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+  <div class="lights" id="lights"></div>
+
+  <header class="title">
+    <h1>焦虑制造机<span class="tm">™</span></h1>
+    <div class="sub">ANXIETY MANUFACTURING MACHINE · 型号 JLV-2026 · 出厂编号 #000001</div>
+    <div class="badges">
+      <span class="badge">已获 <b>ISO-9001</b> 焦虑质量体系认证</span>
+      <span class="badge"><b>CE</b>: Certified Exhausting</span>
+      <span class="badge">连续 <b>3 年</b>销量领先（自封的）</span>
+    </div>
+  </header>
+
+  <section class="screen">
+    <button class="copy-chip" id="btnCopy" title="复制这条焦虑发给朋友">复制</button>
+    <span class="tag" id="itemTag" style="--tag:#5d6577">待机</span>
+    <div class="output" id="output">就绪。按下红色按钮，本机将为你现场定制焦虑。<span class="caret">&nbsp;</span></div>
+    <div class="history" id="history"></div>
+  </section>
+
+  <section class="deck">
+    <div class="module">
+      <div class="label"><span>01 / 主开关</span><span>MAIN</span></div>
+      <button class="btn-red" id="btnMake">制造焦虑</button>
+      <div class="hint">或按 <b>空格键</b> 连打<br>手速越快，焦虑越多</div>
+    </div>
+
+    <div class="module">
+      <div class="label"><span>02 / 焦虑储罐</span><span>TANK</span></div>
+      <div class="tankwrap">
+        <div class="tank"><div class="liquid" id="liquid"></div><div class="ticks"></div></div>
+        <div class="tankval"><span id="tankVal">0</span>%<small>焦虑液位</small></div>
+      </div>
+      <div class="statline">
+        本机已生产 <b id="statProduced">0</b> 条<br>
+        已销毁 <b id="statDestroyed">0</b> 条<br>
+        你在本页已停留 <b id="statSession">0 秒</b>
+      </div>
+    </div>
+
+    <div class="module">
+      <div class="label"><span>03 / 生产参数</span><span>PARAMS</span></div>
+      <div class="row"><span>连续生产</span>
+        <span class="switch"><input type="checkbox" id="autoChk"><span class="track"></span></span>
+      </div>
+      <div class="row"><span>焦虑浓度</span>
+        <select id="level">
+          <option value="0">轻度 · 日常款</option>
+          <option value="1" selected>中度 · 职场款</option>
+          <option value="2">重度 · 深夜款</option>
+          <option value="3">核弹级 · 人生款</option>
+        </select>
+      </div>
+      <div class="row"><span>出生年份 <small style="color:var(--dim)">(精准焦虑用)</small></span>
+        <span style="display:flex;gap:6px;align-items:center">
+          <input type="number" id="birthYear" min="1900" max="2026" placeholder="选填">
+          <button class="btn-mute" id="btnSaveBy">存</button>
+        </span>
+      </div>
+      <div class="row">
+        <span>音效</span>
+        <button class="btn-mute" id="btnMute">🔊 已开启</button>
+      </div>
+      <div class="row"><span>人生余额倒计时 <small style="color:var(--dim)">(需出生年份)</small></span>
+        <span class="switch"><input type="checkbox" id="lifeChk"><span class="track"></span></span>
+      </div>
+      <div class="life-cd" id="lifeCd" hidden>—</div>
+    </div>
+
+    <div class="module destroy">
+      <div>
+        <div class="label" style="margin-bottom:8px"><span>04 / 销毁舱门</span><span>DESTRUCTION</span></div>
+        <div class="hint" style="text-align:left;margin-top:0">
+          把本机生产的焦虑全部粉碎，附赠呼吸练习与销毁证明。<br>
+          焦虑值攒到 <b style="color:var(--red)">100%</b> 机器会过载停机——连机器都知道，焦虑装太满就得停。
+        </div>
+      </div>
+      <button class="btn-green" id="btnDestroy">🔥 切换到销毁模式</button>
+    </div>
+
+    <div class="module wide">
+      <div class="label"><span>05 / 投喂原料</span><span>FEEDING</span></div>
+      <div class="feedrow">
+        <input type="text" id="feedInput" maxlength="40" placeholder="把你正在担心的事投进进料口…">
+        <button class="btn-mini accent" id="btnFeed">投入</button>
+      </div>
+      <div class="mini-out" id="feedOut">进料口空置中。焦虑原料：自备。本机负责深加工并放大。</div>
+    </div>
+
+    <div class="module">
+      <div class="label"><span>06 / 焦虑抽卡</span><span>GACHA</span></div>
+      <div class="gacha-res" id="gachaRes"><span class="rar r">R</span>每日一次免费（骗你的，无限次）。</div>
+      <button class="btn-mini wide-btn" id="btnGacha">🎲 抽卡 · 限时免费</button>
+      <div class="hint" style="text-align:left;margin-top:10px">R 62% · SR 25% · SSR 10% · UR 3%<br>SSR 概率本机保证不暗改（本机连后台都没有）</div>
+    </div>
+
+    <div class="module">
+      <div class="label"><span>07 / 减压气泡纸</span><span>POPPER</span></div>
+      <div class="bubbles" id="bubbles"></div>
+      <div class="hint" id="bubbleHint" style="text-align:left;margin-top:10px">捏爆一个，焦虑值 −1。捏完这批，产线马上补货。</div>
+    </div>
+
+    <div class="module wide">
+      <div class="label"><span>08 / 同辈对账台</span><span>PEER MATH</span></div>
+      <div class="feedrow">
+        <span style="font-size:12.5px;color:var(--dim)">你的月薪 ¥</span>
+        <input type="number" id="salaryInput" placeholder="8000" min="0" style="width:96px">
+        <button class="btn-mini accent" id="btnPeer">开始对账</button>
+        <button class="btn-mini" id="btnPeerStop" hidden>不忍看了</button>
+      </div>
+      <div class="ticker" id="peerTicker" hidden>
+        <div>你已在本页停留 <b id="pkSec">0</b> 秒，按薪已赚 <b id="pkMine">¥0.00</b></div>
+        <div>同辈平均已赚 <b id="pkPeer">¥0.00</b>（速率是你的 <b id="pkRatio">2.3</b> 倍）</div>
+        <div>差距 <b id="pkGap">¥0.00</b>，正在实时拉大</div>
+        <div class="ticker-note">以上数据由本机瞎编，仅供心梗。真实的同辈不会等你对完账。</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <details>
+      <summary>这台机器到底是干嘛的？（设计说明书）</summary>
+      <p>
+        <b>给常焦虑的人：</b>看着焦虑被当成零件，按一个随机数就批量出厂、漏洞百出，你会突然发现它毫无根据——
+        笑一笑，那口气就松了。标签是<b>「荒诞」</b>的货请多拿几件，那是本机偷偷开的解药产线。
+        焦虑攒满了就去绿色销毁舱，跟着圆呼吸，拿一张销毁证明走人。
+      </p>
+      <p>
+        <b>给不焦虑的人：</b>本机会精确命中你从没想过的角度，看完浑身发紧、坐立难安——恭喜，你已经被本机成功转化。
+        如果看完还毫发无损，建议直接来上班，产线缺你这样的心态。
+      </p>
+    </details>
+    <div style="margin-top:10px">
+      免责声明：本机生产的一切焦虑均为随机拼凑，不构成任何有效信息。<br>
+      焦虑制造机不对你的精神状态负责，正如世界不对你的 KPI 负责。
+    </div>
+  </footer>
+</main>
+
+<!-- ================= 销毁模式 ================= -->
+<div class="destroy-view" id="destroyView">
+  <div class="dv-title">
+    <h2>焦虑回收销毁中心</h2>
+    <div class="sub">RECYCLING &amp; DESTRUCTION CENTER · 无害化处理 · 全程可追溯</div>
+  </div>
+
+  <div class="dv-panel">
+    <h3>粉碎流水线</h3>
+    <div class="note">以下为本次送销的焦虑成品，正在逐条无害化处理……</div>
+    <ul class="shred-list" id="shredList"></ul>
+  </div>
+
+  <div class="danmaku" id="danmaku"></div>
+
+  <div class="dv-panel">
+    <h3>神经重置舱 · 跟着圆呼吸</h3>
+    <div class="note">吸气 4 秒 → 屏住 4 秒 → 呼气 6 秒 · 这是给神经系统的系统重启键，免费，无需安装</div>
+    <div class="breath">
+      <div class="circle" id="breathCircle"></div>
+      <div class="breath-text">
+        <div class="ph" id="breathPhase">准备</div>
+        <div class="cd" id="breathCount">—</div>
+        <div class="tip">坚持三轮，皮质醇开始打折</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cert" id="cert">
+    <h2>焦虑销毁完成证明</h2>
+    <div class="meta">
+      编号：<span id="certNo"></span><br>
+      日期：<span id="certDate"></span> · 销毁数量：<span id="certCount"></span> 条<br>
+      处理方式：高温嘲笑 · 低温幽默 · 循环再利用（做成了明天的淡定）
+    </div>
+    <div class="clause">
+      持本证明者，可在 24 小时内合法拒绝一次无意义内耗。<br>
+      本证明可无限次补办。你已经活过了你以为活不过去的每一天，数据支持率：100%。
+    </div>
+  </div>
+
+  <div class="dv-actions">
+    <button class="dv-btn primary" id="btnReDestroy">再销毁一批</button>
+    <button class="dv-btn" id="btnBack">返回制造车间（风险自负）</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ---------------- utils ---------------- */
+const $ = s => document.querySelector(s);
+const RI = (a,b) => Math.floor(a + Math.random()*(b-a+1));
+const pick = a => a[RI(0,a.length-1)];
+const fmt = n => n.toLocaleString('zh-CN');
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+const state = {
+  anxiety: 0,
+  produced: [],
+  overheated: false,
+  muted: false,
+  auto: null,
+  by: null,
+  battery: null,
+  start: Date.now(),
+  typing: null,
+  breathGen: 0,
+};
+
+const LS = {
+  get(k,d){ try{ const v = localStorage.getItem(k); return v===null? d : JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let totalProduced = LS.get('jlv_total', 0);
+let totalDestroyed = LS.get('jlv_destroyed', 0);
+state.by = LS.get('jlv_by', null);
+if (state.by) { $('#birthYear').value = state.by; }
+
+/* ---------------- stats each call ---------------- */
+function stats(){
+  const d = new Date();
+  const sod = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const todayPct = Math.floor((d.getTime()-sod)/864e5*100);
+  const dow = (d.getDay()+6)%7;                       // Mon=0
+  const weekPct = Math.floor((dow + todayPct/100)/7*100);
+  const dim = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+  const monthPct = Math.floor(((d.getDate()-1)+todayPct/100)/dim*100);
+  const diy = Math.round((new Date(d.getFullYear()+1,0,1)-new Date(d.getFullYear(),0,1))/864e5);
+  const doy = Math.floor((d - new Date(d.getFullYear(),0,0))/864e5);
+  const yearPct = Math.floor(doy/diy*100);
+  const yearLeft = diy - doy;
+  const toMonday = dow===0 ? 7 : 7-dow;
+  const sess = Math.floor((Date.now()-state.start)/1000);
+  const s = { todayPct, weekPct, monthPct, yearPct, yearLeft, toMonday, sess, d };
+  if (state.by){
+    const age = d.getFullYear() - state.by;
+    if (age>0 && age<120){
+      s.age = age;
+      s.lifePct = Math.floor(age/80*100);
+      s.weekends = Math.max(1,(80-age)*52);
+      s.livedDays = Math.floor(age*365.25);
+      s.parents = Math.max(2,(80-(age+27))*2);
+    }
+  }
+  return s;
+}
+
+/* ---------------- battery ---------------- */
+if (navigator.getBattery){
+  navigator.getBattery().then(b=>{
+    const up = ()=> state.battery = Math.round(b.level*100);
+    up(); b.addEventListener('levelchange', up);
+  }).catch(()=>{});
+}
+
+/* ---------------- templates ---------------- */
+/* c: 分类, lv: 最低浓度0-3, p: 需出生年份, b: 需电量, t: 文本函数 */
+const T = [
+  // 荒诞（解药产线）
+  {c:'荒诞',lv:0,t:s=>'全宇宙约有 2 万亿个星系。目前没有任何一个星系在乎你今天的效率。'},
+  {c:'荒诞',lv:0,t:s=>'水母没有大脑，在地球活了 6 亿年。说明「想太多」从来不是生存必需品。'},
+  {c:'荒诞',lv:0,t:s=>'你的焦虑是原始人防老虎系统在误报。环顾四周：没有老虎，只有外卖。'},
+  {c:'荒诞',lv:0,t:s=>'就算今天全搞砸了，宇宙的熵照样增加，物理定律依然精确运转。宇宙根本没空怪你。'},
+  {c:'荒诞',lv:1,t:s=>'薛定谔的猫同时处于「完蛋了」和「没事了」的叠加态。你至少可以只选一个。'},
+  {c:'荒诞',lv:1,t:s=>'恐龙统治地球 1.65 亿年，没交过社保，没开过周会，活得非常踏实。'},
+  {c:'荒诞',lv:2,t:s=>'你在焦虑「别人怎么看你」。别人：谁？哦，他啊。……想起来了才怪。'},
+  {c:'荒诞',lv:2,t:s=>'明天的你托本机带话：那件事根本没你想的那么严重。真的，他是过来人。'},
+  // 时间
+  {c:'时间',lv:0,t:s=>'今天已经过去 '+s.todayPct+'% 了。'},
+  {c:'时间',lv:0,t:s=>'距离下个周一还有 '+s.toMonday+' 天。周一从不迟到，也从不请假。'},
+  {c:'时间',lv:0,t:s=>'你已经在这一页停留了 '+s.sess+' 秒。光阴就是这么没的。'},
+  {c:'时间',lv:1,t:s=>'2026 年的日历已经撕掉 '+s.yearPct+'%。你年初立的目标，现在还剩几个字？'},
+  {c:'时间',lv:1,t:s=>'今年还剩 '+s.yearLeft+' 天。去年的今天，你也觉得来日方长。'},
+  {c:'时间',lv:2,t:s=>'这个月已过 '+s.monthPct+'%，工资已花约 120%，数据自己会说话。'},
+  {c:'时间',lv:2,t:s=>'时钟每秒滴答一次。从你打开本页到现在，人生余额已减少 '+s.sess+' 秒，概不退还。'},
+  {c:'时间',lv:3,t:s=>'你昨晚的深睡眠时长，大概率没有你的购物车商品数多。'},
+  // 同辈
+  {c:'同辈',lv:0,t:s=>'你读完这条焦虑约需 5 秒。这 5 秒里，1 个同龄人升职了，3 个在健身，17 个在赚钱。'},
+  {c:'同辈',lv:1,t:s=>'你大学同学群里，这个小时新增了 '+RI(20,99)+' 条与你无关、但都比你过得好的消息。'},
+  {c:'同辈',lv:2,t:s=>'你的前同事刚晒了新工位：落地窗。你的窗外是洗衣机。'},
+  {c:'同辈',lv:2,t:s=>'有个和你同一天出生的人刚办完退休——人家 16 岁出道当童星。'},
+  {c:'同辈',lv:2,t:s=>'「优秀的人从不内耗。」这条推送送给你时，优秀的人正在睡今天第 8 个美容觉。'},
+  {c:'同辈',lv:3,t:s=>'本页访客中，约 '+RI(63,97)+'% 比你先看到这条焦虑。他们已经焦虑完了，正在焦虑下一条。'},
+  {c:'同辈',lv:3,t:s=>'别人在用你刷这个页面的时间健身、学习、谈融资。而你，正在被一台机器收焦虑智商税。'},
+  // 健康
+  {c:'健康',lv:0,t:s=>'你已连续盯着屏幕 '+Math.max(1,Math.floor(s.sess/60))+' 分钟，眨眼次数远低于国家标准。'},
+  {c:'健康',lv:1,t:s=>'你今天的运动量：手指滑动若干次。你的颈椎情绪非常稳定（物理意义上已经麻木）。'},
+  {c:'健康',lv:2,t:s=>'久坐一小时约减寿 22 分钟（本机瞎编的，但你的腰已经开始疼了，对吧）。'},
+  {c:'健康',lv:2,t:s=>'世界卫生组织建议每天走 8000 步。你今天从床到工位走了 47 步，含一次折返。'},
+  {c:'健康',b:true,lv:2,t:s=>'你的手机还剩 '+state.battery+'% 电量。它比你更懂管理精力。'},
+  // 亲情
+  {c:'亲情',lv:0,t:s=>'你妈的微信头像已经 '+RI(2,6)+' 年没换过了。你上次点开她的朋友圈，是什么时候？'},
+  {c:'亲情',lv:1,t:s=>'如果一年回家 2 次、每次 5 天，你这辈子还能见到父母约 50 次。这条本机自己算完也沉默了。'},
+  {c:'亲情',p:true,lv:1,t:s=>'按一年回家 2 次算，你这辈子还能见到父母大约 '+s.parents+' 次。刚看到这个数字的人都没说话。'},
+  {c:'亲情',lv:3,t:s=>'爸妈嘴上说「别惦记我们」，翻译过来是：惦记，但别让他们看出来。'},
+  // 金钱
+  {c:'金钱',lv:0,t:s=>'距离下个还款日还有 '+RI(3,25)+' 天，你的余额已经开始装死。'},
+  {c:'金钱',lv:1,t:s=>'复利是世界第八大奇迹。可惜它偏爱早点开始的人，而你打算「下周开始」。'},
+  {c:'金钱',lv:2,t:s=>'你的同龄人已经开始讨论指数基金定投，你还在认真讨论中午吃什么。'},
+  // 信息
+  {c:'信息',lv:0,t:s=>'你的收藏夹里躺着 '+RI(80,600)+' 篇「稍后再看」。它们已经躺了一年，还在等。'},
+  {c:'信息',lv:1,t:s=>'过去 1 小时，全球新增约 '+RI(300,900)+' 篇论文和 '+RI(2,9)+' 万条新闻。你一条没读，且毫无损失——这句是安慰，但你现在更焦虑了。'},
+  {c:'信息',lv:2,t:s=>'AI 一天读的书，够你焦虑一整年。而且它不焦虑，它只是耗电。'},
+  {c:'信息',lv:3,t:s=>'你的未读消息 + 收藏夹 + 稍后再看，合计约 '+RI(500,3000)+' 条。它们在暗处轻轻叹气。'},
+  // 人生（个人）
+  {c:'人生',p:true,lv:3,t:s=>'按 80 岁算，你的人生进度条已到 '+s.lifePct+'%，只剩 '+fmt(s.weekends)+' 个周末了。'},
+  {c:'人生',p:true,lv:3,t:s=>'你已经来到这个世界 '+fmt(s.livedDays)+' 天。感觉昨晚才刚高考完，对吧。'},
+];
+
+const FAILS = [
+  '生产失败：检测到用户嘴角上扬 2°，原料纯度不足。',
+  '生产失败：该焦虑与用户现有库存重复，已丢弃。',
+  '质检退回：这条焦虑太好笑了，无法上架。',
+  '设备卡纸：焦虑卡在出料口了，师傅明天来。',
+  '本条焦虑原料不足，已退款。到账：安心 ×1。',
+];
+
+const COMFORT = [
+  '焦虑不会解决明天的问题，只会消耗今天的电量。',
+  '大部分你担心的事，连登台机会都没有就下台了。',
+  '焦虑是大脑的烟雾报警器：很灵敏，但烤面包机一响它也叫。',
+  '你不需要为还没发生的事预支痛苦。利息太贵，别借。',
+  '焦虑大约 90 秒代谢一轮。撑过 90 秒，它就换班了。',
+  '今晚的目标：把「必须想明白」降级为「明天再说」。',
+  '你不是走得慢，你只是没跟自己的节奏比。',
+  '你已经活过了你以为活不过去的每一天。数据支持率：100%。',
+  '深呼吸是免费的系统重启键。本舱提供，不限次数。',
+  '担心 = 给没发生的事付全款。建议改成分期：不付。',
+];
+
+const STAMPS = ['已粉碎','已降解','已回收','已超度','已蒸发','已遗忘'];
+
+/* ---------------- sound ---------------- */
+let AC = null;
+function beep(freq, dur, type='square', vol=0.04, delay=0){
+  if (state.muted) return;
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    if (AC.state==='suspended') AC.resume();
+    const t0 = AC.currentTime + delay;
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+    o.connect(g); g.connect(AC.destination);
+    o.start(t0); o.stop(t0+dur+0.02);
+  }catch(e){}
+}
+const sndMake = ()=>{ beep(RI(180,260),0.06,'square',0.05); beep(RI(320,420),0.05,'square',0.03,0.05); };
+const sndFail = ()=>{ beep(110,0.22,'sawtooth',0.05); };
+const sndAlarm = ()=>{ for(let i=0;i<4;i++){ beep(880,0.14,'square',0.05,i*0.3); beep(620,0.14,'square',0.05,i*0.3+0.15);} };
+const sndShred = ()=>{ beep(RI(500,900),0.04,'sawtooth',0.03); };
+const sndDone = ()=>{ beep(523,0.12,'sine',0.06); beep(659,0.12,'sine',0.06,0.12); beep(784,0.2,'sine',0.06,0.24); };
+
+/* ---------------- rendering ---------------- */
+const CAT_COLOR = {
+  '时间':'#f59e0b','同辈':'#f43f5e','健康':'#a78bfa','亲情':'#38bdf8',
+  '金钱':'#fbbf24','信息':'#34d399','荒诞':'#94a3b8','人生':'#fb7185',
+  '待机':'#5d6577','废品':'#5d6577','警告':'#ff4d4f',
+};
+
+function typewrite(text){
+  clearInterval(state.typing);
+  const el = $('#output');
+  const chars = [...text];
+  let i = 0;
+  state.typing = setInterval(()=>{
+    i++;
+    el.innerHTML = chars.slice(0,i).join('') + '<span class="caret">&nbsp;</span>';
+    if (i >= chars.length) clearInterval(state.typing);
+  }, 22);
+}
+
+function setTag(cat){
+  const el = $('#itemTag');
+  el.textContent = cat;
+  el.style.setProperty('--tag', CAT_COLOR[cat] || '#8b93a7');
+}
+
+function pushHistory(text){
+  const h = $('#history');
+  const span = document.createElement('span');
+  span.textContent = text;
+  h.prepend(span);
+  while (h.children.length > 5) h.lastChild.remove();
+}
+
+function updateGauge(){
+  const v = Math.round(state.anxiety);
+  $('#liquid').style.height = v + '%';
+  $('#tankVal').textContent = v;
+}
+
+function updateStats(){
+  $('#statProduced').textContent = fmt(totalProduced);
+  $('#statDestroyed').textContent = fmt(totalDestroyed);
+  const s = Math.floor((Date.now()-state.start)/1000);
+  $('#statSession').textContent = s>=60 ? Math.floor(s/60)+' 分 '+(s%60)+' 秒' : s+' 秒';
+  const lc = $('#lifeCd');
+  if ($('#lifeChk').checked && state.by){
+    const d = new Date();
+    const target = new Date(state.by+80, d.getMonth(), d.getDate()).getTime();
+    const rem = Math.max(0, Math.floor((target-Date.now())/1000));
+    lc.hidden = false;
+    lc.textContent = '人生余额约剩 '+fmt(rem)+' 秒（按 80 岁计，含双休，不含加班）。每秒都在减少，概不赊账。';
+  } else {
+    lc.hidden = true;
+  }
+}
+
+function blinkLights(){
+  const lamps = [...$('#lights').children];
+  lamps.forEach(l=>{ if(Math.random()<0.6){ l.classList.add('on'); setTimeout(()=>l.classList.remove('on'), RI(120,400)); }});
+}
+
+/* ---------------- core: manufacture ---------------- */
+function manufacture(){
+  if (state.overheated) return;
+  const s = stats();
+  const lvl = +$('#level').value;
+
+  // 偶尔生产失败 —— 给焦虑的人留一个喘气口
+  if (state.produced.length > 1 && Math.random() < 0.13){
+    const f = pick(FAILS);
+    setTag('废品'); typewrite(f); pushHistory(f);
+    state.anxiety = Math.max(0, state.anxiety - 5);
+    updateGauge(); sndFail(); blinkLights();
+    return;
+  }
+
+  let pool = T.filter(t => t.lv<=lvl && (!t.p || s.age) && (!t.b || state.battery!=null));
+  if (lvl >= 2 && Math.random() < 0.5){
+    const hot = pool.filter(t=>t.lv===lvl);
+    if (hot.length) pool = hot;
+  }
+  const item = pick(pool);
+  const text = typeof item.t === 'function' ? item.t(s) : item.t;
+
+  setTag(item.c);
+  typewrite(text);
+  pushHistory(text);
+
+  state.produced.push(text);
+  if (state.produced.length > 40) state.produced.shift();
+  totalProduced++;
+  LS.set('jlv_total', totalProduced);
+
+  const gain = item.c==='荒诞' ? RI(2,5) : RI(8,14);
+  state.anxiety = clamp(state.anxiety + gain, 0, 100);
+  updateGauge(); updateStats(); sndMake(); blinkLights();
+
+  if (state.anxiety >= 100) overheat();
+}
+
+function overheat(){
+  state.overheated = true;
+  if (state.auto){ clearInterval(state.auto); state.auto = null; $('#autoChk').checked = false; }
+  $('#btnMake').disabled = true;
+  setTag('警告');
+  typewrite('⚠️ 焦虑值已满 100%，触发过载停机保护。本机拒绝继续生产——连机器都知道，焦虑装太满是要出事的。请前往绿色「销毁模式」处理库存。');
+  pushHistory('⚠️ 过载停机：焦虑值 100%');
+  $('#machine').classList.add('shake');
+  $('#overheatBanner').classList.add('show');
+  sndAlarm();
+}
+
+/* ---------------- destroy mode ---------------- */
+let danmakuTimer = null;
+
+function openDestroy(){
+  const view = $('#destroyView');
+  view.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  startBreath();
+  runShred();
+  startDanmaku();
+}
+
+function closeDestroy(){
+  $('#destroyView').classList.remove('show');
+  document.body.style.overflow = '';
+  state.breathGen++;
+  clearInterval(danmakuTimer); danmakuTimer = null;
+  // 清空储罐，恢复生产
+  const n = state.produced.length;
+  totalDestroyed += n;
+  LS.set('jlv_destroyed', totalDestroyed);
+  state.produced = [];
+  state.anxiety = 0;
+  state.overheated = false;
+  updateGauge(); updateStats();
+  $('#btnMake').disabled = false;
+  $('#machine').classList.remove('shake');
+  $('#overheatBanner').classList.remove('show');
+  setTag('待机');
+  typewrite('储罐已清空，过载保护已复位。红色按钮恢复可用——但我建议你先把呼吸做完。');
+  pushHistory('✅ 销毁完成，库存清零（'+n+' 条）');
+  sndDone();
+}
+
+function runShred(){
+  const list = $('#shredList');
+  list.innerHTML = '';
+  $('#cert').classList.remove('show');
+  let items = state.produced.slice(-18).reverse();
+  if (!items.length) items = ['库存样品：周一','库存样品：别人家的孩子','库存样品：还没发生的坏事'];
+  items.forEach(t=>{
+    const li = document.createElement('li');
+    li.textContent = t;
+    const st = document.createElement('span');
+    st.className = 'stamp';
+    st.textContent = pick(STAMPS);
+    li.appendChild(st);
+    list.appendChild(li);
+  });
+  const lis = [...list.children];
+  lis.forEach((li,i)=> setTimeout(()=>{ li.classList.add('shredded'); sndShred(); }, 350*i + 300));
+  setTimeout(()=>{ showCert(items.length); }, 350*lis.length + 900);
+}
+
+function showCert(n){
+  $('#certNo').textContent = 'JLV-XH-' + Date.now().toString(36).toUpperCase();
+  $('#certDate').textContent = new Date().toLocaleString('zh-CN');
+  $('#certCount').textContent = n;
+  $('#cert').classList.add('show');
+  sndDone();
+}
+
+function startDanmaku(){
+  clearInterval(danmakuTimer);
+  danmakuTimer = setInterval(()=>{
+    const box = $('#danmaku');
+    if (box.children.length > 6) return;
+    const sp = document.createElement('span');
+    sp.textContent = pick(COMFORT);
+    sp.style.top = RI(2,26) + 'px';
+    sp.style.animationDuration = RI(8,13) + 's';
+    box.appendChild(sp);
+    sp.addEventListener('animationend', ()=>sp.remove());
+  }, 1100);
+}
+
+function startBreath(){
+  const gen = ++state.breathGen;
+  const circle = $('#breathCircle'), ph = $('#breathPhase'), cd = $('#breathCount');
+  const phases = [ ['吸气',4,'in'], ['屏住',4,'hold'], ['呼气',6,'out'] ];
+  let idx = 0;
+  function setPhase(name, sec, mode){
+    if (gen !== state.breathGen) return;
+    ph.textContent = name;
+    circle.style.transitionDuration = (mode==='hold' ? 0.2 : sec) + 's';
+    if (mode==='in') circle.style.transform = 'scale(1.28)';
+    if (mode==='out') circle.style.transform = 'scale(0.72)';
+    let left = sec;
+    cd.textContent = left;
+    const tick = setInterval(()=>{
+      if (gen !== state.breathGen){ clearInterval(tick); return; }
+      left--;
+      if (left > 0) cd.textContent = left;
+      else { clearInterval(tick); idx = (idx+1)%phases.length; setPhase(...phases[idx]); }
+    }, 1000);
+  }
+  setPhase('准备',2,'hold');
+  setTimeout(()=>{ if(gen===state.breathGen){ idx=0; setPhase(...phases[0]); } }, 2000);
+}
+
+/* ---------------- aux stations (05-08) ---------------- */
+function addAnxiety(delta){
+  if (state.overheated && delta > 0) return;
+  state.anxiety = clamp(state.anxiety + delta, 0, 100);
+  updateGauge();
+  if (state.anxiety >= 100) overheat();
+}
+function guardOver(){
+  if (!state.overheated) return true;
+  setTag('警告');
+  typewrite('本机过载停机中，所有进料口与娱乐设施暂停开放。请先去绿色销毁模式处理库存。');
+  return false;
+}
+
+/* 05 投喂原料 */
+const FEEDS = [
+  w=>`已投喂：「${w}」。经本机深加工，该事件失败率已上调 37%，且你妈那边也快知道了。`,
+  w=>`「${w}」已进入发酵罐，预计 48 小时后发酵成更大的焦虑。建议今晚开始想。`,
+  w=>`检测到原料「${w}」纯度过高。本机什么都不用做——你自己每晚都会把它放大 10 倍。`,
+  w=>`「${w}」已上架销售。温馨提示：这类原料 92% 不会发生，但你可以先焦虑着。`,
+  w=>`「${w}」收货成功。本机顺便提醒：三年后你会彻底忘记这件事。此结论已验证 1 亿次。`,
+];
+$('#btnFeed').addEventListener('click', ()=>{
+  if (!guardOver()) return;
+  const w = $('#feedInput').value.trim();
+  const out = $('#feedOut');
+  if (!w){
+    out.textContent = '投喂失败：你连要焦虑什么都还没想好。这本身就已经很焦虑了。';
+    return;
+  }
+  out.textContent = '';
+  out.append(pick(FEEDS)(w));
+  out.append(document.createTextNode(' '));
+  const link = document.createElement('button');
+  link.className = 'destroy-link';
+  link.textContent = '这条不要了，立即销毁';
+  link.addEventListener('click', ()=>{
+    addAnxiety(-8); sndShred();
+    out.textContent = `已销毁「${w}」。焦虑值 −8，本机假装它从没存在过。`;
+  });
+  out.append(link);
+  addAnxiety(RI(6,10)); sndMake(); blinkLights();
+});
+$('#feedInput').addEventListener('keydown', e=>{ if (e.key==='Enter') $('#btnFeed').click(); });
+
+/* 06 焦虑抽卡 */
+const UR_POOL = [
+  'UR·绝缘款：检测到你正在笑，本条焦虑判定对你无效，焦虑值已倒扣作为赔偿。',
+  'UR·水母款：恭喜获得水母体质——没有大脑，在地球活了 6 亿年，毫无焦虑。',
+  'UR·反向款：本条焦虑出厂时忘了装「让你难受」的零件。退款已按原路退回你的心情。',
+];
+let gachaBusy = false;
+$('#btnGacha').addEventListener('click', ()=>{
+  if (gachaBusy || !guardOver()) return;
+  gachaBusy = true;
+  const res = $('#gachaRes'), btn = $('#btnGacha');
+  btn.disabled = true;
+  const spin = setInterval(()=>{
+    res.innerHTML = '抽取中：<b>'+pick(['周一','别人家的孩子','房租','体检报告','同龄人','未读消息','深睡眠','花呗'])+'</b> …';
+  }, 70);
+  setTimeout(()=>{
+    clearInterval(spin);
+    const s = stats();
+    const roll = Math.random();
+    let rar, gain, pool = null;
+    if (roll < 0.03){ rar='ur'; gain=-6; }
+    else if (roll < 0.13){ rar='ssr'; gain=RI(12,15); pool=T.filter(t=>t.lv===3 && (!t.p||s.age)); }
+    else if (roll < 0.38){ rar='sr'; gain=RI(7,10); pool=T.filter(t=>(t.lv===1||t.lv===2) && (!t.p||s.age) && (!t.b||state.battery!=null)); }
+    else { rar='r'; gain=RI(3,5); pool=T.filter(t=>t.lv===0); }
+    const text = pool ? pick(pool).t(s) : pick(UR_POOL);
+    res.innerHTML = '';
+    const tag = document.createElement('span');
+    tag.className = 'rar '+rar;
+    tag.textContent = rar.toUpperCase();
+    res.append(tag, document.createTextNode(text));
+    if (rar==='ur'){
+      res.classList.remove('ur-hit'); void res.offsetWidth; res.classList.add('ur-hit');
+      pushHistory('UR 抽中：焦虑判定无效，焦虑值已倒扣');
+      sndDone();
+    } else {
+      sndMake();
+    }
+    addAnxiety(gain);
+    blinkLights();
+    btn.disabled = false; gachaBusy = false;
+  }, 950);
+});
+
+/* 07 减压气泡纸 */
+function buildBubbles(){
+  const box = $('#bubbles');
+  box.innerHTML = '';
+  let popped = 0;
+  for (let i=0; i<24; i++){
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'bubble';
+    b.addEventListener('click', ()=>{
+      if (b.classList.contains('popped')) return;
+      b.classList.add('popped');
+      beep(RI(500,900), 0.035, 'sine', 0.05);
+      addAnxiety(-1);
+      popped++;
+      if (popped >= 24){
+        $('#bubbleHint').textContent = '这批 24 个已全部捏爆。产线刚补了新货——焦虑的产能，你放心。';
+        setTimeout(buildBubbles, 1200);
+      }
+    });
+    box.append(b);
+  }
+}
+
+/* 08 同辈对账台 */
+let peerTimer = null, peerRate = 0;
+$('#btnPeer').addEventListener('click', ()=>{
+  if (peerTimer) clearInterval(peerTimer);
+  const salary = Math.max(0, parseFloat($('#salaryInput').value) || 8000);
+  peerRate = 2.1 + Math.random()*0.5;
+  $('#peerTicker').hidden = false;
+  $('#btnPeer').hidden = true;
+  $('#btnPeerStop').hidden = false;
+  $('#peerTicker .ticker-note').textContent = '以上数据由本机瞎编，仅供心梗。真实的同辈不会等你对完账。';
+  peerTimer = setInterval(()=>{
+    const sec = (Date.now()-state.start)/1000;
+    const mine = sec*salary/(21.75*8*3600);
+    const peer = mine*peerRate;
+    $('#pkSec').textContent = fmt(Math.floor(sec));
+    $('#pkMine').textContent = '¥'+mine.toFixed(2);
+    $('#pkPeer').textContent = '¥'+peer.toFixed(2);
+    $('#pkRatio').textContent = peerRate.toFixed(1);
+    $('#pkGap').textContent = '¥'+(peer-mine).toFixed(2);
+  }, 100);
+});
+$('#btnPeerStop').addEventListener('click', ()=>{
+  if (peerTimer){ clearInterval(peerTimer); peerTimer = null; }
+  $('#btnPeer').hidden = false;
+  $('#btnPeerStop').hidden = true;
+  $('#peerTicker .ticker-note').textContent = '对账结束。本机建议：把差距除以 80 年、再除以 8760 小时——摊到每小时后，它小数点后那点东西，不值得你今晚失眠。';
+});
+
+/* 复制这条焦虑 */
+$('#btnCopy').addEventListener('click', async ()=>{
+  const text = $('#output').textContent.replace(/\u00a0/g,' ').trim();
+  try { await navigator.clipboard.writeText(text); }
+  catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.append(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch(_){}
+    ta.remove();
+  }
+  const b = $('#btnCopy');
+  b.textContent = '已复制 ✓ 去祸害朋友';
+  setTimeout(()=>{ b.textContent = '复制'; }, 1600);
+});
+
+/* 人生余额开关 */
+$('#lifeChk').addEventListener('change', e=>{
+  if (e.target.checked && !state.by){
+    e.target.checked = false;
+    setTag('待机');
+    typewrite('人生余额需要出生年份才能开通。03 号工位，填了也不敢保证你能接受结果。');
+  }
+});
+
+/* ---------------- events ---------------- */
+$('#btnMake').addEventListener('click', manufacture);
+document.addEventListener('keydown', e=>{
+  const tag = (e.target.tagName||'').toUpperCase();
+  if (e.code==='Space' && !['INPUT','SELECT','TEXTAREA'].includes(tag)){
+    e.preventDefault();
+    if (!$('#destroyView').classList.contains('show')) manufacture();
+  }
+});
+
+$('#autoChk').addEventListener('change', e=>{
+  if (e.target.checked){
+    state.auto = setInterval(manufacture, 2200);
+    manufacture();
+  } else if (state.auto){
+    clearInterval(state.auto); state.auto = null;
+  }
+});
+
+$('#btnSaveBy').addEventListener('click', ()=>{
+  const v = parseInt($('#birthYear').value, 10);
+  if (v>=1900 && v<=new Date().getFullYear()){
+    state.by = v; LS.set('jlv_by', v);
+    setTag('待机'); typewrite('出生年份已录入。本机的焦虑精度提升 300%，你马上就能感受到诚意。');
+  } else {
+    setTag('待机'); typewrite('这个年份本机不敢用。请输入 1900 至今年的合法年份。');
+  }
+});
+
+$('#btnMute').addEventListener('click', e=>{
+  state.muted = !state.muted;
+  e.target.textContent = state.muted ? '🔇 已静音' : '🔊 已开启';
+});
+
+$('#btnDestroy').addEventListener('click', openDestroy);
+$('#btnBack').addEventListener('click', closeDestroy);
+$('#btnReDestroy').addEventListener('click', runShred);
+
+/* ---------------- init ---------------- */
+(function init(){
+  const lights = $('#lights');
+  for (let i=0;i<14;i++){ const d=document.createElement('i'); d.className='lamp'; lights.appendChild(d); }
+  blinkLights(); setInterval(blinkLights, 900);
+  buildBubbles();
+  updateGauge(); updateStats();
+  setInterval(updateStats, 1000);
+})();
+</script>
+</body>
+</html>
